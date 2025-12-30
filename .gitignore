@@ -1,0 +1,56 @@
+############################
+# General
+############################
+.DS_Store
+Thumbs.db
+logs/
+*.log
+*.tmp
+*.temp
+
+############################
+# Maven / Spring Boot
+############################
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+############################
+# STS / Eclipse
+############################
+.metadata/
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+
+############################
+# IntelliJ IDEA
+############################
+.idea/
+*.iws
+*.iml
+*.ipr
+
+############################
+# VS Code
+############################
+.vscode/
+
+############################
+# Environment / Secrets
+############################
+.env
+*.env
+application-local.properties
+application-dev.properties
+application-test.properties
+
+############################
+# Database
+############################
+data/db/
+*.db
+*.sqlite
