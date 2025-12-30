@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 public class ApproveUsersRequest {
-    @NotEmpty
-    private List<String> userIds;
+    private List<String> ids;
 }
+
 
