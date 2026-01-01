@@ -4,6 +4,7 @@ public enum ServiceStatus {
     REQUESTED,
     ASSIGNED,
     IN_PROGRESS,
-    COMPLETED
+    COMPLETED,
+    CLOSED
 }
 

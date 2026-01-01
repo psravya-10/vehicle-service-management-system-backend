@@ -1,10 +1,10 @@
 package com.vsms.servicerequest.service;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 
-import com.vsms.servicerequest.dto.AssignServiceRequestDto;
-import com.vsms.servicerequest.dto.CreateServiceRequestDto;
+import org.springframework.stereotype.Service;
+
+import com.vsms.servicerequest.dto.*;
 import com.vsms.servicerequest.entity.*;
 import com.vsms.servicerequest.feign.UserFeignClient;
 import com.vsms.servicerequest.repository.*;
@@ -19,92 +19,82 @@ public class ServiceRequestService {
     private final ServiceBayRepository bayRepo;
     private final UserFeignClient userFeign;
 
-    // CREATE SERVICE REQUEST
+    // customer - create
     public ServiceRequest create(CreateServiceRequestDto dto) {
-
-        ServiceRequest request = ServiceRequest.builder()
+        return requestRepo.save(
+            ServiceRequest.builder()
                 .userId(dto.getUserId())
                 .vehicleId(dto.getVehicleId())
                 .issueDescription(dto.getIssueDescription())
+                .priority(dto.getPriority())
                 .status(ServiceStatus.REQUESTED)
-                .build();
-
-        return requestRepo.save(request);
+                .build()
+        );
     }
 
-    // ASSIGN SERVICE REQUEST 
-//    @Transactional
+    // manger assigning task
     public void assign(String requestId, AssignServiceRequestDto dto) {
-
-        System.out.println("Assign request started for requestId = " + requestId);
 
         ServiceRequest req = requestRepo.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Service request not found"));
 
+        if (req.getStatus() != ServiceStatus.REQUESTED) {
+            throw new RuntimeException("Service already assigned");
+        }
+
         ServiceBay bay = bayRepo.findById(dto.getBayId())
                 .orElseThrow(() -> new RuntimeException("Bay not found"));
 
-        if (bay.getStatus() == BayStatus.BUSY) {
+        if (bay.getStatus() != BayStatus.AVAILABLE) {
             throw new RuntimeException("Bay is busy");
         }
 
-      
-        System.out.println("Calling user-service to set technician BUSY: " + dto.getTechnicianId());
-
-        //  FEIGN CALL
-        userFeign.updateTechnicianStatus(dto.getTechnicianId(), false);
-
-        System.out.println("Technician status updated successfully");
-
+        // Occupy bay
         bay.setStatus(BayStatus.BUSY);
         bayRepo.save(bay);
+
+        // Occupy technician
+        userFeign.updateTechnicianStatus(dto.getTechnicianId(), false);
 
         req.setTechnicianId(dto.getTechnicianId());
         req.setBayId(dto.getBayId());
         req.setStatus(ServiceStatus.ASSIGNED);
 
         requestRepo.save(req);
-
-        System.out.println("Service request assigned successfully");
     }
 
-    public void startService(String requestId) {
+    // manger closeservice
+    public void closeService(String requestId) {
 
         ServiceRequest req = requestRepo.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Service request not found"));
 
-        if (req.getStatus() != ServiceStatus.ASSIGNED) {
-            throw new RuntimeException("Service is not assigned");
+        if (req.getStatus() != ServiceStatus.COMPLETED) {
+            throw new RuntimeException("Service not completed yet");
         }
 
-        req.setStatus(ServiceStatus.IN_PROGRESS);
-        requestRepo.save(req);
-    }
-
-
-    public void completeService(String requestId) {
-
-        ServiceRequest req = requestRepo.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Service request not found"));
-
-        if (req.getStatus() != ServiceStatus.IN_PROGRESS) {
-            throw new RuntimeException("Service is not in progress");
-        }
-
-        //  Release bay
-        ServiceBay bay = bayRepo.findById(req.getBayId())
-                .orElseThrow(() -> new RuntimeException("Bay not found"));
-
+        // Release bay
+        ServiceBay bay = bayRepo.findById(req.getBayId()).orElseThrow();
         bay.setStatus(BayStatus.AVAILABLE);
         bayRepo.save(bay);
 
-        //  Release technician
+        // Release technician
         userFeign.updateTechnicianStatus(req.getTechnicianId(), true);
 
-        // Update service request
-        req.setStatus(ServiceStatus.COMPLETED);
+        req.setStatus(ServiceStatus.CLOSED);
         requestRepo.save(req);
     }
+    public List<ServiceRequest> getAll() {
+        return requestRepo.findAll();
+    }
 
+    public List<ServiceRequest> getPending() {
+        return requestRepo.findByStatus(ServiceStatus.REQUESTED);
+    }
+    public ServiceRequest getById(String id) {
+        return requestRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Service request not found"));
+    }
 
+    
 }

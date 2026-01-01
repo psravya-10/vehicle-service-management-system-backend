@@ -21,7 +21,9 @@ public class ServiceRequest {
 
     private String technicianId;
     private String bayId;
-
+    private ServicePriority priority;
+    private String remarks;
+   
     private ServiceStatus status;
 }
 
