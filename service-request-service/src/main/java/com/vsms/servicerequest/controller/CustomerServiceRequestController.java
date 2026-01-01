@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import com.vsms.servicerequest.dto.CreateServiceRequestDto;
 import com.vsms.servicerequest.dto.ServiceRequestResponse;
 import com.vsms.servicerequest.entity.ServiceRequest;
+import com.vsms.servicerequest.entity.ServiceStatus;
 import com.vsms.servicerequest.service.ServiceRequestService;
 
 import lombok.RequiredArgsConstructor;
@@ -20,5 +21,11 @@ public class CustomerServiceRequestController {
     public ServiceRequest create(@RequestBody CreateServiceRequestDto dto) {
         return service.create(dto);
     }
+
+    @GetMapping("/{id}")
+    public ServiceRequest getById(@PathVariable String id) {
+        return service.getById(id);
+    }
+
 }
 
