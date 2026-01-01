@@ -28,8 +28,9 @@ public class ManagerController {
 
     @GetMapping("/technicians/available")
     public List<TechnicianResponse> availableTechnicians() {
-        return managerService.getAllTechnicians();
+        return managerService.getAvailableTechnicians(); 
     }
+
 
 }
 

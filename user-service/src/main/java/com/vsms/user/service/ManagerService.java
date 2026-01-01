@@ -34,7 +34,18 @@ public class ManagerService {
                 .map(this::map)
                 .toList();
     }
+    public void updateTechnicianAvailability(String technicianId, AvailabilityStatus status) {
 
+        User technician = repo.findById(technicianId)
+                .orElseThrow(() -> new BusinessException("Technician not found"));
+
+        if (technician.getRole() != Role.TECHNICIAN) {
+            throw new BusinessException("User is not a technician");
+        }
+
+        technician.setAvailability(status);
+        repo.save(technician);
+    }
     private TechnicianResponse map(User u) {
         return TechnicianResponse.builder()
                 .id(u.getId())
