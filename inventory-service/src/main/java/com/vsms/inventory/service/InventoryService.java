@@ -3,6 +3,7 @@ package com.vsms.inventory.service;
 import com.vsms.inventory.dto.*;
 import com.vsms.inventory.entity.*;
 import com.vsms.inventory.exception.ResourceNotFoundException;
+import com.vsms.inventory.feign.ServiceRequestClient;
 import com.vsms.inventory.repository.*;
 import lombok.RequiredArgsConstructor;
 
@@ -16,6 +17,7 @@ public class InventoryService {
 
     private final SparePartRepository partRepo;
     private final PartRequestRepository requestRepo;
+    private final ServiceRequestClient serviceRequestClient;
 
     public String addPart(CreateSparePartDto dto) {
 
@@ -74,6 +76,21 @@ public class InventoryService {
         request.setStatus(RequestStatus.APPROVED);
         request.setApprovedBy(managerId);
         requestRepo.save(request);
+        
+        
+        UsedPartDto usedPart = UsedPartDto.builder()
+                .partId(part.getId())
+                .partName(part.getName())
+                .quantity(request.getQuantity())
+                .unitPrice(part.getUnitPrice())
+                .totalPrice(part.getUnitPrice() * request.getQuantity())
+                .build();
+        System.out.println(">>> Calling ServiceRequest to add used part");
+
+        serviceRequestClient.addUsedPart(
+                request.getServiceRequestId(),
+                usedPart
+        );
     }
     public List<SparePart> getAllParts() {
         return partRepo.findAll();
