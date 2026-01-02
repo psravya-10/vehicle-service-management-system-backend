@@ -19,4 +19,6 @@ public interface UserFeignClient {
             @PathVariable String technicianId,
             @RequestParam boolean available
     );
+    @GetMapping("/api/users/{userId}/email")
+    String getUserEmail(@PathVariable("userId") String userId);
 }

@@ -6,8 +6,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.vsms.servicerequest.dto.NotificationEvent;
 import com.vsms.servicerequest.entity.*;
 import com.vsms.servicerequest.exception.BusinessException;
+import com.vsms.servicerequest.feign.UserFeignClient;
+import com.vsms.servicerequest.messaging.NotificationPublisher;
 import com.vsms.servicerequest.repository.InvoiceRepository;
 import com.vsms.servicerequest.repository.ServiceRequestRepository;
 
@@ -19,6 +22,8 @@ public class BillingService {
 
     private final ServiceRequestRepository serviceRepo;
     private final InvoiceRepository invoiceRepo;
+    private final NotificationPublisher notificationPublisher;
+    private final UserFeignClient userFeign;
 
     
     public Invoice generateInvoice(String serviceRequestId) {
@@ -51,7 +56,21 @@ public class BillingService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        return invoiceRepo.save(invoice);
+        Invoice savedInvoice = invoiceRepo.save(invoice);
+        
+        // Send invoice notification when invoice is generated (during close)
+        String userEmail = userFeign.getUserEmail(req.getUserId());
+        notificationPublisher.publish(
+            NotificationEvent.builder()
+                .eventType("INVOICE_GENERATED")
+                .userEmail(userEmail)
+                .serviceRequestId(serviceRequestId)
+                .invoiceId(savedInvoice.getId())
+                .amount(savedInvoice.getTotalAmount())
+                .build()
+        );
+        
+        return savedInvoice;
     }
 
    

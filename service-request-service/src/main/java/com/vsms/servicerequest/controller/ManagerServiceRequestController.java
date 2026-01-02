@@ -27,7 +27,7 @@ public class ManagerServiceRequestController {
     public List<ServiceRequest> pending() {
         return service.getPending();
     }
- // GET BY ID
+
     @GetMapping("/{id}")
     public ServiceRequest getById(@PathVariable String id) {
         return service.getById(id);
@@ -35,15 +35,11 @@ public class ManagerServiceRequestController {
 
 
     @PutMapping("/{id}/assign")
-    public void assign(
-            @PathVariable String id,
-            @RequestBody AssignServiceRequestDto dto) {
+    public void assign(@PathVariable String id, @RequestBody AssignServiceRequestDto dto) {
         service.assign(id, dto);
     }
     @PutMapping("/{id}/close")
-    public void close(
-            @PathVariable String id,
-            @RequestParam Double labourCharges) {
+    public void close(@PathVariable String id,@RequestParam Double labourCharges) {
 
         service.closeService(id, labourCharges);
     }

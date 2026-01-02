@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.vsms.servicerequest.dto.*;
 import com.vsms.servicerequest.entity.*;
 import com.vsms.servicerequest.feign.UserFeignClient;
+import com.vsms.servicerequest.messaging.NotificationPublisher;
 import com.vsms.servicerequest.repository.*;
 
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,8 @@ public class ServiceRequestService {
     private final ServiceBayRepository bayRepo;
     private final UserFeignClient userFeign;
     private final  BillingService billingService;
+    private final NotificationPublisher notificationPublisher;
+
 
     // customer - create
     public ServiceRequest create(CreateServiceRequestDto dto) {
@@ -63,6 +66,19 @@ public class ServiceRequestService {
         req.setStatus(ServiceStatus.ASSIGNED);
 
         requestRepo.save(req);
+        String userEmail = userFeign.getUserEmail(req.getUserId());
+
+        notificationPublisher.publish(
+            NotificationEvent.builder()
+                .eventType("SERVICE_STARTED")
+                .userId(req.getUserId())
+                .userEmail(userEmail)
+                .serviceRequestId(req.getId())
+                .message("Your service has started")
+                .build()
+        );
+
+
     }
 
     // manger closeservice
@@ -93,6 +109,20 @@ public class ServiceRequestService {
         requestRepo.save(req);
         
         billingService.generateInvoice(requestId);
+        
+        String userEmail = userFeign.getUserEmail(req.getUserId());
+
+        notificationPublisher.publish(
+        	    NotificationEvent.builder()
+        	        .eventType("SERVICE_CLOSED")
+        	        .userEmail(userEmail)
+        	        .serviceRequestId(req.getId())
+        	        .message("Your service has been completed")
+        	        .build()
+        	);
+
+
+
     }
 
     public List<ServiceRequest> getAll() {
