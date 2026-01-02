@@ -19,6 +19,7 @@ public class ServiceRequestService {
     private final ServiceRequestRepository requestRepo;
     private final ServiceBayRepository bayRepo;
     private final UserFeignClient userFeign;
+    private final  BillingService billingService;
 
     // customer - create
     public ServiceRequest create(CreateServiceRequestDto dto) {
@@ -90,6 +91,8 @@ public class ServiceRequestService {
 
         req.setStatus(ServiceStatus.CLOSED);
         requestRepo.save(req);
+        
+        billingService.generateInvoice(requestId);
     }
 
     public List<ServiceRequest> getAll() {
