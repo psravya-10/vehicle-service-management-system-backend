@@ -1,0 +1,22 @@
+package com.vsms.notification.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class NotificationEvent {
+
+    private String eventType;        
+    private String userId;           
+    private String userEmail;        
+    private String serviceRequestId; 
+    private String invoiceId;        
+    private Double amount;           
+    private String message;          
+}
+
