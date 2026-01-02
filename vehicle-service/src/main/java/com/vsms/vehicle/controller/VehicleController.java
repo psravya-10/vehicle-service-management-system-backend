@@ -2,6 +2,8 @@ package com.vsms.vehicle.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,8 +26,10 @@ public class VehicleController {
     public ResponseEntity<VehicleResponse> createVehicle(
             @Valid @RequestBody CreateVehicleRequest request) {
 
-        return ResponseEntity.ok(vehicleService.createVehicle(request));
+        VehicleResponse response = vehicleService.createVehicle(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
 
     @GetMapping
     public ResponseEntity<List<VehicleResponse>> getAllVehicles() {
