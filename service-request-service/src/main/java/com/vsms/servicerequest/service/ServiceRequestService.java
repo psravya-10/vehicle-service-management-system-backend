@@ -1,5 +1,6 @@
 package com.vsms.servicerequest.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -64,7 +65,7 @@ public class ServiceRequestService {
     }
 
     // manger closeservice
-    public void closeService(String requestId) {
+    public void closeService(String requestId, double labourCharges) {
 
         ServiceRequest req = requestRepo.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Service request not found"));
@@ -73,17 +74,24 @@ public class ServiceRequestService {
             throw new RuntimeException("Service not completed yet");
         }
 
-        // Release bay
+        if (labourCharges <= 0) {
+            throw new RuntimeException("Labour charges required");
+        }
+
+        req.setLabourCharges(labourCharges);
+
+        // release bay
         ServiceBay bay = bayRepo.findById(req.getBayId()).orElseThrow();
         bay.setStatus(BayStatus.AVAILABLE);
         bayRepo.save(bay);
 
-        // Release technician
+        // release technician
         userFeign.updateTechnicianStatus(req.getTechnicianId(), true);
 
         req.setStatus(ServiceStatus.CLOSED);
         requestRepo.save(req);
     }
+
     public List<ServiceRequest> getAll() {
         return requestRepo.findAll();
     }
@@ -95,6 +103,31 @@ public class ServiceRequestService {
         return requestRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Service request not found"));
     }
+    public void addUsedPart(String serviceRequestId, UsedPart usedPart) {
+
+        ServiceRequest req = requestRepo.findById(serviceRequestId)
+                .orElseThrow(() -> new RuntimeException("Service request not found"));
+
+        if (req.getPartsUsed() == null) {
+            req.setPartsUsed(new ArrayList<>());
+        }
+
+        req.getPartsUsed().add(usedPart);
+
+        double partsTotal = req.getPartsUsed()
+                .stream()
+                .mapToDouble(UsedPart::getTotalPrice)
+                .sum();
+
+        req.setPartsTotal(partsTotal);
+
+        requestRepo.save(req);
+    }
+
+
+
+
+
 
     
 }

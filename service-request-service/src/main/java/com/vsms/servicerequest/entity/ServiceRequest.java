@@ -1,5 +1,7 @@
 package com.vsms.servicerequest.entity;
 
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -25,5 +27,9 @@ public class ServiceRequest {
     private String remarks;
    
     private ServiceStatus status;
+    private Double labourCharges;
+
+    private List<UsedPart> partsUsed;
+    private Double partsTotal;
 }
 
