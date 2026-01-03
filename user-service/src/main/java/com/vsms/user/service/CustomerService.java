@@ -41,13 +41,11 @@ public class CustomerService {
                 .build();
     }
 
-
-    @Autowired
-    MongoTemplate mongoTemplate;
-
-    @PostConstruct
-    public void checkDb() {
-        System.out.println(">>> Mongo DB Name = " + mongoTemplate.getDb().getName());
+    public String getEmailByUserId(String userId) {
+        User user = repo.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getEmail();
     }
+
 
 }

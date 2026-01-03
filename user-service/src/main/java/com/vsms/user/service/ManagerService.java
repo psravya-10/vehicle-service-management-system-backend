@@ -30,10 +30,12 @@ public class ManagerService {
     public List<TechnicianResponse> getAvailableTechnicians() {
         return repo.findByRoleAndStatus(Role.TECHNICIAN, UserStatus.APPROVED)
                 .stream()
-                .filter(t -> t.getAvailability() == AvailabilityStatus.AVAILABLE)
+                .filter(t -> t.getAvailability() != null)
+                .filter(t -> AvailabilityStatus.AVAILABLE.equals(t.getAvailability()))
                 .map(this::map)
                 .toList();
     }
+
     public void updateTechnicianAvailability(String technicianId, AvailabilityStatus status) {
 
         User technician = repo.findById(technicianId)

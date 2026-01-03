@@ -21,5 +21,5 @@ public class CustomerController {
     public CustomerResponse getCustomer(@PathVariable String id) {
         return customerService.getCustomerById(id);
     }
-
 }
+

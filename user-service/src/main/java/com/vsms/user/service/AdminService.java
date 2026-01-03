@@ -35,7 +35,6 @@ public class AdminService {
         }
     }
 
-
     private CustomerResponse map(User u) {
         return CustomerResponse.builder()
                 .id(u.getId())

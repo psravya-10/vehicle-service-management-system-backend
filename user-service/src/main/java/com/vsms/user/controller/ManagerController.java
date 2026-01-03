@@ -28,7 +28,7 @@ public class ManagerController {
 
     @GetMapping("/technicians/available")
     public List<TechnicianResponse> availableTechnicians() {
-        return managerService.getAvailableTechnicians(); 
+        return managerService.getAvailableTechnicians();
     }
 
 
