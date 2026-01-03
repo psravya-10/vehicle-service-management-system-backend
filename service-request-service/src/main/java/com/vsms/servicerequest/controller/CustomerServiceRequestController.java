@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/service-requests")
+@RequestMapping("/api/customer/service-requests")
 @RequiredArgsConstructor
 public class CustomerServiceRequestController {
 
@@ -30,8 +30,6 @@ public class CustomerServiceRequestController {
                 .status(HttpStatus.CREATED)
                 .body(new CreateServiceRequestResponse(created.getId()));
     }
-
-
 
     @GetMapping("/{id}")
     public ResponseEntity<ServiceRequest> getById(@PathVariable String id) {
