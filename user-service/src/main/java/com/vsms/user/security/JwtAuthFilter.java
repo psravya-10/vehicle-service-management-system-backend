@@ -14,18 +14,17 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
-	
 
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return request.getRequestURI().startsWith("/api/auth");
+        String path = request.getRequestURI();
+        return path.startsWith("/api/auth") || path.startsWith("/internal") || path.startsWith("/api/users");
     }
 
-    
     @Override
-    
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
@@ -34,28 +33,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
 
         if (header != null && header.startsWith("Bearer ")) {
-            String token = header.substring(7);
-            String userId = jwtUtil.extractEmail(token);
+            try {
+                String token = header.substring(7);
+                String email = jwtUtil.extractEmail(token);
 
-            UserDetails userDetails =
-                    userDetailsService.loadUserByUsername(userId);
+                if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-            UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
+                    UsernamePasswordAuthenticationToken auth =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails, null, userDetails.getAuthorities());
 
-            SecurityContextHolder.getContext().setAuthentication(auth);
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
+            } catch (Exception e) {
+            }
         }
 
         filterChain.doFilter(request, response);
-        System.out.println(
-        	    SecurityContextHolder.getContext()
-        	        .getAuthentication()
-        	        .getAuthorities()
-        	);
-        
-
     }
-    
 }
-
