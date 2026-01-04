@@ -17,7 +17,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/customer/vehicles")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class CustomerVehicleController {
 
     private final VehicleService vehicleService;
@@ -29,9 +28,9 @@ public class CustomerVehicleController {
     }
 
     @GetMapping
-    public ResponseEntity<List<VehicleResponse>> getMyVehicles(@RequestHeader("X-User-Email") String userEmail) {
+    public ResponseEntity<List<VehicleResponse>> getMyVehicles(@RequestHeader("X-User-Id") String userId) {
        
-        return ResponseEntity.ok(vehicleService.getVehiclesByUser(userEmail));
+        return ResponseEntity.ok(vehicleService.getVehiclesByUser(userId));
     }
 
     @GetMapping("/{id}")

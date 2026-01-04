@@ -1,0 +1,42 @@
+let token;
+
+try {
+    console.log(" tech tries to crete service request  ");
+    
+    // Run your saved Login request (replace with your actual ID)
+    const loginResponse = await pm.execution.runRequest("41716232-077717c1-9b3c-40cd-89a4-616c425a7365");
+    token = loginResponse.json().token;
+    console.log("Logged in as: ");
+    
+    // Try to access customer endpoint
+    let response = await pm.sendRequest({
+        url: 'http://localhost:9090/api/customer/service-requests',
+        method: 'POST',
+        header: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        },
+        body: {
+            mode: 'raw',
+            raw: JSON.stringify({
+  "userId": "69581c7c1e00af70d7e2fa46",
+  "vehicleId": "69581cd794dc9e6053a88412",
+  "issueDescription": "full repair",
+  "priority": "NORMAL"
+}
+
+)
+        }
+    });
+    
+    console.log("Response Status:", response.code);
+    
+    if (response.code === 403) {
+        console.log(" ACCESS BLOCKED - tech cannot create service req");
+    } else {
+        console.log(" UNEXPECTED - Got:", response.code);
+    }
+    
+} catch (err) {
+    console.error("Request failed:", err);
+}
