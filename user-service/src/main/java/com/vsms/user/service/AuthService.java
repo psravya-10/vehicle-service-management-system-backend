@@ -18,7 +18,7 @@ public class AuthService {
     private final PasswordEncoder encoder;
     private final JwtUtil jwtUtil;
 
-    public void registerCustomer(RegisterCustomerRequest req) {
+    public String registerCustomer(RegisterCustomerRequest req) {
 
         if (repo.findByEmail(req.getEmail()).isPresent())
             throw new BusinessException("Email already registered");
@@ -33,7 +33,8 @@ public class AuthService {
                 .status(UserStatus.APPROVED) // customers auto approved
                 .build();
 
-        repo.save(user);
+        User savedUser = repo.save(user);
+        return savedUser.getId();
     }
 
 

@@ -18,10 +18,10 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register/customer")
-    public ResponseEntity<Void> registerCustomer( @Valid @RequestBody RegisterCustomerRequest req) {
+    public ResponseEntity<RegisterCustomerResponse> registerCustomer(@Valid @RequestBody RegisterCustomerRequest req) {
 
-        authService.registerCustomer(req);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        String customerId = authService.registerCustomer(req);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new RegisterCustomerResponse(customerId));
     }
 
 
