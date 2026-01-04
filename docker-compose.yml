@@ -1,0 +1,114 @@
+services:
+
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  eureka:
+    build: ./eureka-server
+    container_name: eureka
+    restart: always
+    ports:
+      - "8761:8761"
+
+  config-server:
+    build: ./config-server
+    container_name: config-server
+    restart: always
+    ports:
+      - "8888:8888"
+    depends_on:
+      - eureka
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    restart: always
+    ports:
+      - "9090:8080"
+    depends_on:
+      - eureka
+      - config-server
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    restart: always
+    depends_on:
+      - mongo
+      - eureka
+      - config-server
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+
+  vehicle-service:
+    build: ./vehicle-service
+    container_name: vehicle-service
+    restart: always
+    depends_on:
+      - mongo
+      - eureka
+      - config-server
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+
+  inventory-service:
+    build: ./inventory-service
+    container_name: inventory-service
+    restart: always
+    depends_on:
+      - mongo
+      - eureka
+      - config-server
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+
+  service-request-service:
+    build: ./service-request-service
+    container_name: service-request-service
+    restart: always
+    depends_on:
+      - mongo
+      - rabbitmq
+      - eureka
+      - config-server
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    restart: always
+    depends_on:
+      - rabbitmq
+      - eureka
+      - config-server
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+
+volumes:
+  mongo_data:
+  rabbitmq_data:
