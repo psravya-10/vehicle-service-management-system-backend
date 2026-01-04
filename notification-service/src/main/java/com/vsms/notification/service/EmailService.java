@@ -41,7 +41,7 @@ public class EmailService {
     public void sendInvoiceGenerated(NotificationEvent event) {
         String subject = "Invoice Generated - VSMS";
         String body = "Dear Customer,\n\n" +
-                "Your invoice has been generated.\n" +
+                
                 "Invoice ID: " + event.getInvoiceId() + "\n" +
                 "Amount: ₹" + (event.getAmount() != null ? event.getAmount() : 0) + "\n" +
                 "Payment Status: PENDING\n\n" +

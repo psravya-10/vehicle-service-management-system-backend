@@ -19,7 +19,7 @@ public class BillingController {
 
     private final BillingService billingService;
 
-  
+    
     @GetMapping("/service-request/{serviceRequestId}")
     public ResponseEntity<Invoice> getByServiceRequest(@PathVariable String serviceRequestId) {
 
@@ -28,7 +28,6 @@ public class BillingController {
         );
     }
 
-    
     @GetMapping("/invoices/{invoiceId}")
     public ResponseEntity<Invoice> getById( @PathVariable String invoiceId) {
 
@@ -38,7 +37,7 @@ public class BillingController {
     }
 
     
-    @GetMapping("/invoices")
+    @GetMapping("/admin/invoices")
     public ResponseEntity<List<Invoice>> byStatus(@RequestParam PaymentStatus status) {
 
         return ResponseEntity.ok(
@@ -46,16 +45,15 @@ public class BillingController {
         );
     }
 
-  
-    @GetMapping("/reports/monthly")
-    public ResponseEntity<List<Invoice>> monthlyReport( @RequestParam int year,@RequestParam int month) {
+    @GetMapping("/admin/reports/monthly")
+    public ResponseEntity<List<Invoice>> monthlyReport(@RequestParam int year, @RequestParam int month) {
 
         return ResponseEntity.ok(
                 billingService.monthlyReport(year, month)
         );
     }
 
-  
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Invoice>> getUserInvoices(@PathVariable String userId) {
 
@@ -64,8 +62,8 @@ public class BillingController {
         );
     }
 
-    
-    @PutMapping("/invoices/{invoiceId}/pay")
+
+    @PutMapping("/customer/invoices/{invoiceId}/pay")
     public ResponseEntity<String> pay(@PathVariable String invoiceId) {
 
         billingService.markInvoicePaid(invoiceId);

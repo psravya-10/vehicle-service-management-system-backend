@@ -27,6 +27,7 @@ public class InventoryService {
                         .category(dto.getCategory())
                         .availableQuantity(dto.getAvailableQuantity())
                         .unitPrice(dto.getUnitPrice())
+                        .lowStockThreshold(3)
                         .build()
         );
 
@@ -76,7 +77,6 @@ public class InventoryService {
         request.setStatus(RequestStatus.APPROVED);
         request.setApprovedBy(managerId);
         requestRepo.save(request);
-        
         
         UsedPartDto usedPart = UsedPartDto.builder()
                 .partId(part.getId())

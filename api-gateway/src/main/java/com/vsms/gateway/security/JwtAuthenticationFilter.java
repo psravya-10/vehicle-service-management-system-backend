@@ -110,10 +110,20 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             return "CUSTOMER".equals(role);
         }
      
+        if (path.startsWith("/api/billing/admin")) {
+            return "ADMIN".equals(role);
+        }
+        if (path.startsWith("/api/billing/customer")) {
+            return "CUSTOMER".equals(role);
+        }
         if (path.startsWith("/api/billing")) {
             return "MANAGER".equals(role) || "ADMIN".equals(role) || "CUSTOMER".equals(role);
         }
-   
+        
+        if (path.startsWith("/api/inventory/requests") && !path.contains("/approve")) {
+            return "TECHNICIAN".equals(role) || "MANAGER".equals(role) || "ADMIN".equals(role);
+        }
+        
         if (path.startsWith("/api/inventory")) {
             return "MANAGER".equals(role) || "ADMIN".equals(role);
         }
