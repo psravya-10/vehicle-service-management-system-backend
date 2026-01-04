@@ -1,5 +1,7 @@
 package com.vsms.servicerequest.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +37,14 @@ public class CustomerServiceRequestController {
     public ResponseEntity<ServiceRequest> getById(@PathVariable String id) {
         return ResponseEntity.ok(service.getById(id));
     }
+
+    @GetMapping("/vehicle/{vehicleId}")
+    public ResponseEntity<List<ServiceRequest>> getByVehicleId(@PathVariable String vehicleId) {
+        return ResponseEntity.ok(service.getByVehicleId(vehicleId));
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<List<ServiceRequest>> getMyServiceRequests(@RequestHeader("X-User-Id") String userId) {
+        return ResponseEntity.ok(service.getByUserId(userId));
+    }
 }
-
-

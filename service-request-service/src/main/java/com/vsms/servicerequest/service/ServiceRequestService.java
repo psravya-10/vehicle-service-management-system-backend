@@ -26,6 +26,15 @@ public class ServiceRequestService {
 
     // customer - create
     public ServiceRequest create(CreateServiceRequestDto dto) {
+        // Check if vehicle already has an active service request
+        List<ServiceRequest> activeRequests = requestRepo.findByVehicleId(dto.getVehicleId());
+        boolean hasActiveRequest = activeRequests.stream()
+                .anyMatch(req -> req.getStatus() != ServiceStatus.CLOSED);
+        
+        if (hasActiveRequest) {
+            throw new RuntimeException("Vehicle already in service");
+        }
+        
         return requestRepo.save(
             ServiceRequest.builder()
                 .userId(dto.getUserId())
@@ -157,10 +166,23 @@ public class ServiceRequestService {
         requestRepo.save(req);
     }
 
+    // Get service requests by vehicle ID
+    public List<ServiceRequest> getByVehicleId(String vehicleId) {
+        return requestRepo.findByVehicleId(vehicleId);
+    }
 
+    // Get service requests by user ID
+    public List<ServiceRequest> getByUserId(String userId) {
+        return requestRepo.findByUserId(userId);
+    }
 
+    // Get service requests by technician ID
+    public List<ServiceRequest> getByTechnicianId(String technicianId) {
+        return requestRepo.findByTechnicianId(technicianId);
+    }
 
-
-
-    
+    // Save service request
+    public ServiceRequest save(ServiceRequest request) {
+        return requestRepo.save(request);
+    }
 }

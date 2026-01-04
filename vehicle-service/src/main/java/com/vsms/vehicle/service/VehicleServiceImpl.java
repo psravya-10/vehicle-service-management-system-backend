@@ -21,6 +21,11 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public VehicleResponse createVehicle(CreateVehicleRequest request) {
 
+        // Check for duplicate registration number
+        if (vehicleRepository.findByRegistrationNumber(request.getRegistrationNumber()).isPresent()) {
+            throw new RuntimeException("This registration number already exists");
+        }
+
         Vehicle vehicle = Vehicle.builder()
                 .userId(request.getUserId())
                 .registrationNumber(request.getRegistrationNumber())

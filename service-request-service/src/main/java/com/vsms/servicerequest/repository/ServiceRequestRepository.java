@@ -12,5 +12,7 @@ public interface ServiceRequestRepository
 
     List<ServiceRequest> findByUserId(String userId);
     List<ServiceRequest> findByStatus(ServiceStatus status);
+    List<ServiceRequest> findByVehicleId(String vehicleId);
+    List<ServiceRequest> findByTechnicianId(String technicianId);
 
 }
