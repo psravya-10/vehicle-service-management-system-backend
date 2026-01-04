@@ -83,7 +83,7 @@
                 </execution>
             </executions>
             <configuration>
-                <mainClass>com.flightapp.config.ConfigServerFlightbookingApplication</mainClass>
+                <mainClass>com.vsms.config.ConfigServerApplication</mainClass>
             </configuration>
         </plugin>
 
