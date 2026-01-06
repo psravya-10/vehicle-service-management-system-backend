@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import com.vsms.servicerequest.dto.TechnicianUpdateServiceStatusDto;
 import com.vsms.servicerequest.entity.ServiceRequest;
 import com.vsms.servicerequest.entity.ServiceStatus;
+import com.vsms.servicerequest.service.InventoryServiceClient;
 import com.vsms.servicerequest.service.ServiceRequestService;
 
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class TechnicianServiceRequestController {
 
     private final ServiceRequestService service;
+    private final InventoryServiceClient inventoryServiceClient;
 
     @GetMapping
     public ResponseEntity<List<ServiceRequest>> getMyAssignedTasks(@RequestHeader("X-User-Id") String technicianId) {
@@ -34,6 +36,14 @@ public class TechnicianServiceRequestController {
         if (dto.getStatus() != ServiceStatus.IN_PROGRESS &&
             dto.getStatus() != ServiceStatus.COMPLETED) {
             throw new RuntimeException("Invalid status update");
+        }
+
+        // Check for pending part requests before allowing COMPLETED (with circuit breaker)
+        if (dto.getStatus() == ServiceStatus.COMPLETED) {
+            boolean hasPending = inventoryServiceClient.hasPendingRequests(id);
+            if (hasPending) {
+                throw new RuntimeException("Cannot mark as completed. Part request is pending manager approval.");
+            }
         }
 
         req.setStatus(dto.getStatus());
