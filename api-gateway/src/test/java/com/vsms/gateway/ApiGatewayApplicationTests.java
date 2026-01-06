@@ -3,7 +3,10 @@ package com.vsms.gateway;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+    "spring.cloud.config.enabled=false",
+    "jwt.secret=vsms-secret-key-vsms-secret-key-vsms"
+})
 class ApiGatewayApplicationTests {
 
 	@Test
