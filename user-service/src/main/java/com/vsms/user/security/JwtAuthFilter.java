@@ -21,13 +21,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
+        if (path.equals("/api/auth/profile") || path.equals("/api/auth/change-password")) {
+            return false;
+        }
         return path.startsWith("/api/auth") || path.startsWith("/internal") || path.startsWith("/api/users");
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+HttpServletResponse response,
+FilterChain filterChain)
             throws ServletException, IOException {
 
         String header = request.getHeader("Authorization");

@@ -11,5 +11,7 @@ public class CustomerResponse {
     private String name;
     private String email;
     private Role role;
+    private UserStatus status;
+    private String phone;
+    private String pincode;
 }
-

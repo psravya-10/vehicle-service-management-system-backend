@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.vsms.servicerequest.dto.*;
 import com.vsms.servicerequest.entity.*;
-import com.vsms.servicerequest.feign.UserFeignClient;
+
 import com.vsms.servicerequest.messaging.NotificationPublisher;
 import com.vsms.servicerequest.repository.*;
 
@@ -19,7 +19,7 @@ public class ServiceRequestService {
 
     private final ServiceRequestRepository requestRepo;
     private final ServiceBayRepository bayRepo;
-    private final UserFeignClient userFeign;
+    private final UserServiceClient userServiceClient;
     private final  BillingService billingService;
     private final NotificationPublisher notificationPublisher;
 
@@ -68,14 +68,14 @@ public class ServiceRequestService {
         bayRepo.save(bay);
 
         // Occupy technician
-        userFeign.updateTechnicianStatus(dto.getTechnicianId(), false);
+        userServiceClient.updateTechnicianStatus(dto.getTechnicianId(), false);
 
         req.setTechnicianId(dto.getTechnicianId());
         req.setBayId(dto.getBayId());
         req.setStatus(ServiceStatus.ASSIGNED);
 
         requestRepo.save(req);
-        String userEmail = userFeign.getUserEmail(req.getUserId());
+        String userEmail = userServiceClient.getUserEmail(req.getUserId());
 
         notificationPublisher.publish(
             NotificationEvent.builder()
@@ -112,14 +112,14 @@ public class ServiceRequestService {
         bayRepo.save(bay);
 
         // release technician
-        userFeign.updateTechnicianStatus(req.getTechnicianId(), true);
+        userServiceClient.updateTechnicianStatus(req.getTechnicianId(), true);
 
         req.setStatus(ServiceStatus.CLOSED);
         requestRepo.save(req);
         
         billingService.generateInvoice(requestId);
         
-        String userEmail = userFeign.getUserEmail(req.getUserId());
+        String userEmail = userServiceClient.getUserEmail(req.getUserId());
 
         notificationPublisher.publish(
         	    NotificationEvent.builder()
@@ -185,4 +185,13 @@ public class ServiceRequestService {
     public ServiceRequest save(ServiceRequest request) {
         return requestRepo.save(request);
     }
+
+    public long getTechnicianWorkload(String technicianId) {
+        List<ServiceStatus> activeStatuses = List.of(
+            ServiceStatus.ASSIGNED, 
+            ServiceStatus.IN_PROGRESS
+        );
+        return requestRepo.countByTechnicianIdAndStatusIn(technicianId, activeStatuses);
+    }
 }
+

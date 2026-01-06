@@ -107,7 +107,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         
        
         if (path.startsWith("/api/customer")) {
-            return "CUSTOMER".equals(role);
+            return "CUSTOMER".equals(role) || "ADMIN".equals(role);
         }
      
         if (path.startsWith("/api/billing/admin")) {
@@ -124,6 +124,11 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             return "TECHNICIAN".equals(role) || "MANAGER".equals(role) || "ADMIN".equals(role);
         }
         
+
+        if (path.equals("/api/inventory/parts") || path.startsWith("/api/inventory/parts/")) {
+            return "TECHNICIAN".equals(role) || "MANAGER".equals(role) || "ADMIN".equals(role);
+        }
+        
         if (path.startsWith("/api/inventory")) {
             return "MANAGER".equals(role) || "ADMIN".equals(role);
         }
@@ -137,6 +142,9 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             return true;
         }
         
+        if (path.startsWith("/api/profile")) {
+            return true;
+        }
 
         return true;
     }

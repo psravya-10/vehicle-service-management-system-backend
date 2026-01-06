@@ -14,5 +14,8 @@ public interface ServiceRequestRepository
     List<ServiceRequest> findByStatus(ServiceStatus status);
     List<ServiceRequest> findByVehicleId(String vehicleId);
     List<ServiceRequest> findByTechnicianId(String technicianId);
+    List<ServiceRequest> findByTechnicianIdAndStatusIn(String technicianId, List<ServiceStatus> statuses);
+    long countByTechnicianIdAndStatusIn(String technicianId, List<ServiceStatus> statuses);
 
 }
+

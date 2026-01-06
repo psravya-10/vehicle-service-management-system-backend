@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import com.vsms.servicerequest.dto.NotificationEvent;
 import com.vsms.servicerequest.entity.*;
 import com.vsms.servicerequest.exception.BusinessException;
-import com.vsms.servicerequest.feign.UserFeignClient;
+
 import com.vsms.servicerequest.messaging.NotificationPublisher;
 import com.vsms.servicerequest.repository.InvoiceRepository;
 import com.vsms.servicerequest.repository.ServiceRequestRepository;
@@ -23,7 +23,7 @@ public class BillingService {
     private final ServiceRequestRepository serviceRepo;
     private final InvoiceRepository invoiceRepo;
     private final NotificationPublisher notificationPublisher;
-    private final UserFeignClient userFeign;
+    private final UserServiceClient userServiceClient;
 
     
     public Invoice generateInvoice(String serviceRequestId) {
@@ -35,7 +35,6 @@ public class BillingService {
             throw new BusinessException("Service must be CLOSED to generate invoice");
         }
 
-        // Prevent duplicate invoice
         invoiceRepo.findByServiceRequestId(serviceRequestId)
                 .ifPresent(i -> {
                     throw new BusinessException("Invoice already generated");
@@ -59,7 +58,20 @@ public class BillingService {
         Invoice savedInvoice = invoiceRepo.save(invoice);
         
         // Send invoice notification when invoice is generated (during close)
-        String userEmail = userFeign.getUserEmail(req.getUserId());
+        String userEmail = userServiceClient.getUserEmail(req.getUserId());
+    
+        List<NotificationEvent.PartDetail> partDetails = null;
+        if (req.getPartsUsed() != null && !req.getPartsUsed().isEmpty()) {
+            partDetails = req.getPartsUsed().stream()
+                .map(p -> NotificationEvent.PartDetail.builder()
+                    .partName(p.getPartName())
+                    .quantity(p.getQuantity())
+                    .unitPrice(p.getUnitPrice())
+                    .totalPrice(p.getTotalPrice())
+                    .build())
+                .toList();
+        }
+        
         notificationPublisher.publish(
             NotificationEvent.builder()
                 .eventType("INVOICE_GENERATED")
@@ -67,6 +79,9 @@ public class BillingService {
                 .serviceRequestId(serviceRequestId)
                 .invoiceId(savedInvoice.getId())
                 .amount(savedInvoice.getTotalAmount())
+                .labourCharges(savedInvoice.getLabourCharges())
+                .partsTotal(savedInvoice.getPartsTotal())
+                .partsUsed(partDetails)
                 .build()
         );
         
