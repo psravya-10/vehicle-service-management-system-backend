@@ -16,38 +16,24 @@ import lombok.RequiredArgsConstructor;
 public class NotificationConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(NotificationConsumer.class);
-    
     private final EmailService emailService;
 
     @RabbitListener(queues = RabbitMQConfig.QUEUE)
     public void consume(NotificationEvent event) {
-
         if (event == null || event.getEventType() == null) {
-            System.err.println("Invalid notification event: " + event);
-            return; 
+            log.error("Invalid notification event: {}", event);
+            return;
         }
+
+        log.info("Received event: {}", event.getEventType());
 
         switch (event.getEventType()) {
-
-            case "SERVICE_STARTED" -> {
-                if (event.getUserEmail() != null)
-                    emailService.sendServiceStarted(event);
-            }
-
-            case "SERVICE_CLOSED" -> {
-                if (event.getUserEmail() != null)
-                    emailService.sendServiceClosed(event);
-            }
-
-            case "INVOICE_GENERATED" -> {
-                if (event.getUserEmail() != null)
-                    emailService.sendInvoiceGenerated(event);
-            }
-
-            default ->
-                System.out.println("Unknown event type: " + event.getEventType());
+            case "SERVICE_STARTED" -> emailService.sendServiceStarted(event);
+            case "SERVICE_CLOSED" -> emailService.sendServiceClosed(event);
+            case "INVOICE_GENERATED" -> emailService.sendInvoiceGenerated(event);
+            case "REGISTRATION_APPROVED" -> emailService.sendRegistrationApproved(event);
+            case "REGISTRATION_REJECTED" -> emailService.sendRegistrationRejected(event);
+            default -> log.warn("Unknown event type: {}", event.getEventType());
         }
     }
-
 }
-

@@ -73,11 +73,25 @@ public class AuthService {
         if (!encoder.matches(req.getPassword(), user.getPassword()))
             throw new BusinessException("Invalid credentials");
 
-        if (user.getStatus() != UserStatus.APPROVED)
-            throw new BusinessException("Account not approved by admin");
+        if (user.getStatus() == UserStatus.PENDING)
+            throw new BusinessException("Your account is pending, need admin approval");
+        if (user.getStatus() == UserStatus.REJECTED)
+            throw new BusinessException("Your account has been rejected");
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
 
         return new LoginResponse(token, user.getRole());
+    }
+
+    public void changePassword(String email, ChangePasswordRequest req) {
+        User user = repo.findByEmail(email)
+                .orElseThrow(() -> new BusinessException("User not found"));
+
+        if (!encoder.matches(req.getCurrentPassword(), user.getPassword())) {
+            throw new BusinessException("Current password is incorrect");
+        }
+
+        user.setPassword(encoder.encode(req.getNewPassword()));
+        repo.save(user);
     }
 }

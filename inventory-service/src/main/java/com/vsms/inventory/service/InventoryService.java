@@ -3,7 +3,7 @@ package com.vsms.inventory.service;
 import com.vsms.inventory.dto.*;
 import com.vsms.inventory.entity.*;
 import com.vsms.inventory.exception.ResourceNotFoundException;
-import com.vsms.inventory.feign.ServiceRequestClient;
+
 import com.vsms.inventory.repository.*;
 import lombok.RequiredArgsConstructor;
 
@@ -17,7 +17,7 @@ public class InventoryService {
 
     private final SparePartRepository partRepo;
     private final PartRequestRepository requestRepo;
-    private final ServiceRequestClient serviceRequestClient;
+    private final ServiceRequestServiceClient serviceRequestServiceClient;
 
     public String addPart(CreateSparePartDto dto) {
 
@@ -87,13 +87,54 @@ public class InventoryService {
                 .build();
         System.out.println(">>> Calling ServiceRequest to add used part");
 
-        serviceRequestClient.addUsedPart(
+        serviceRequestServiceClient.addUsedPart(
                 request.getServiceRequestId(),
                 usedPart
         );
     }
     public List<SparePart> getAllParts() {
         return partRepo.findAll();
+    }
+
+    public boolean hasPendingRequests(String serviceRequestId) {
+        List<PartRequest> requests = requestRepo.findByServiceRequestId(serviceRequestId);
+        return requests.stream().anyMatch(r -> r.getStatus() == RequestStatus.REQUESTED);
+    }
+
+    public List<SparePart> getLowStockParts() {
+        return partRepo.findLowStockParts();
+    }
+
+    public void restockPart(String partId, int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than 0");
+        }
+        
+        SparePart part = partRepo.findById(partId)
+                .orElseThrow(() -> new ResourceNotFoundException("Spare part not found"));
+        
+        part.setAvailableQuantity(part.getAvailableQuantity() + quantity);
+        partRepo.save(part);
+    }
+
+    public void updateThreshold(String partId, int threshold) {
+        if (threshold < 0) {
+            throw new IllegalArgumentException("Threshold cannot be negative");
+        }
+        
+        SparePart part = partRepo.findById(partId)
+                .orElseThrow(() -> new ResourceNotFoundException("Spare part not found"));
+        
+        part.setLowStockThreshold(threshold);
+        partRepo.save(part);
+    }
+
+    public List<PartRequest> getAllPartRequests() {
+        return requestRepo.findAll();
+    }
+
+    public List<PartRequest> getPartRequestsByStatus(RequestStatus status) {
+        return requestRepo.findByStatus(status);
     }
 
 }

@@ -1,9 +1,7 @@
 package com.vsms.notification.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.List;
+import lombok.*;
 
 @Data
 @Builder
@@ -17,6 +15,21 @@ public class NotificationEvent {
     private String serviceRequestId; 
     private String invoiceId;        
     private Double amount;           
-    private String message;          
+    private String message;
+    
+    // Invoice details for detailed email
+    private Double labourCharges;
+    private Double partsTotal;
+    private List<PartDetail> partsUsed;
+    
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PartDetail {
+        private String partName;
+        private int quantity;
+        private double unitPrice;
+        private double totalPrice;
+    }
 }
-
