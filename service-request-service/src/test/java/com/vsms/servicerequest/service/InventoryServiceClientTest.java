@@ -19,9 +19,6 @@ class InventoryServiceClientTest {
 
     @InjectMocks
     private InventoryServiceClient inventoryServiceClient;
-
-    // ========== hasPendingRequests() tests ==========
-
     @Test
     void hasPendingRequests_ReturnsTrue() {
         when(inventoryFeignClient.hasPendingRequests("sr-1")).thenReturn(true);
@@ -41,7 +38,6 @@ class InventoryServiceClientTest {
         assertFalse(result);
     }
 
-    // ========== hasPendingRequestsFallback() tests ==========
 
     @Test
     void hasPendingRequestsFallback_ThrowsServiceUnavailableException() {
