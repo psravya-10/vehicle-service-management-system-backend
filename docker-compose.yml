@@ -156,4 +156,6 @@ services:
 
 volumes:
   mongo_data:
+    name: vehicle-service-management-system-backend_mongo_data
   rabbitmq_data:
+    name: vehicle-service-management-system-backend_rabbitmq_data
