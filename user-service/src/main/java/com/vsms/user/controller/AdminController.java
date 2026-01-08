@@ -37,9 +37,10 @@ public class AdminController {
 
     // Approve or reject a user
     @PutMapping("/users/{id}/approval")
-    public void updateApproval(
+    public String updateApproval(
             @PathVariable String id,
             @RequestParam boolean approved) {
         adminService.updateApproval(id, approved);
+        return approved ? "Staff approved successfully" : "Staff rejected successfully";
     }
 }

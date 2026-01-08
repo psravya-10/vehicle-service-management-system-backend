@@ -1,6 +1,5 @@
 package com.vsms.vehicle.dto;
 
-
 import com.vsms.vehicle.entity.VehicleType;
 
 import jakarta.validation.constraints.*;
@@ -13,10 +12,7 @@ public class CreateVehicleRequest {
     private String userId;
 
     @NotBlank(message = "Registration number is required")
-    @Pattern(
-        regexp = "^[A-Z]{2}[0-9]{2}[A-Z]{2}[0-9]{4}$",
-        message = "Invalid registration number format"
-    )
+    @Pattern(regexp = "^[A-Z]{2}[0-9]{2}[A-Z]{2}[0-9]{4}$", message = "Invalid registration number format")
     private String registrationNumber;
 
     @NotBlank(message = "Brand is required")

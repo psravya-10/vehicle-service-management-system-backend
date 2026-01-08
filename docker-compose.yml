@@ -8,6 +8,12 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -18,6 +24,12 @@ services:
       - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   eureka:
     build: ./eureka-server
@@ -25,6 +37,12 @@ services:
     restart: always
     ports:
       - "8761:8761"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   config-server:
     build: ./config-server
@@ -33,7 +51,16 @@ services:
     ports:
       - "8888:8888"
     depends_on:
-      - eureka
+      eureka:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   api-gateway:
     build: ./api-gateway
@@ -42,8 +69,10 @@ services:
     ports:
       - "9090:8080"
     depends_on:
-      - eureka
-      - config-server
+      eureka:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
@@ -53,9 +82,12 @@ services:
     container_name: user-service
     restart: always
     depends_on:
-      - mongo
-      - eureka
-      - config-server
+      mongo:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
@@ -65,9 +97,12 @@ services:
     container_name: vehicle-service
     restart: always
     depends_on:
-      - mongo
-      - eureka
-      - config-server
+      mongo:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
@@ -77,9 +112,12 @@ services:
     container_name: inventory-service
     restart: always
     depends_on:
-      - mongo
-      - eureka
-      - config-server
+      mongo:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
@@ -89,10 +127,14 @@ services:
     container_name: service-request-service
     restart: always
     depends_on:
-      - mongo
-      - rabbitmq
-      - eureka
-      - config-server
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
@@ -102,9 +144,12 @@ services:
     container_name: notification-service
     restart: always
     depends_on:
-      - rabbitmq
-      - eureka
-      - config-server
+      rabbitmq:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
